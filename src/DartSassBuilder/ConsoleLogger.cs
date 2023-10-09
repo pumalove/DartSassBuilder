@@ -1,4 +1,6 @@
-﻿namespace DartSassBuilder;
+﻿using Spectre.Console;
+
+namespace DartSassBuilder;
 
 public enum OutputLevel
 {
@@ -29,9 +31,21 @@ public class ConsoleLogger
 
     private void Log(OutputLevel level, string line = "")
     {
+        var logColor = level switch
+        {
+            OutputLevel.Trace => "grey",
+            OutputLevel.Debug => "blue",
+            OutputLevel.Information => "green",
+            OutputLevel.Warning => "yellow",
+            OutputLevel.Error => "orange",
+            OutputLevel.Critical => "red",
+            OutputLevel.None => "white",
+            _ => "green",
+        };
+
         if (level >= OutputLevel)
         {
-            Console.WriteLine($"{level}: {line}");
+            AnsiConsole.MarkupLine($"[{logColor}]{level}[/]: {line}");
         }
     }
 
