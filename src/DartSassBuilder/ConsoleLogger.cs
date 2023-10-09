@@ -33,14 +33,14 @@ public class ConsoleLogger
     {
         var logColor = level switch
         {
-            OutputLevel.Trace => "grey",
-            OutputLevel.Debug => "blue",
-            OutputLevel.Default => "green",
-            OutputLevel.Warning => "yellow",
-            OutputLevel.Error => "orange",
-            OutputLevel.Critical => "red",
-            OutputLevel.None => "white",
-            _ => "green",
+            OutputLevel.Trace => Color.Grey,
+            OutputLevel.Debug => Color.Blue,
+            OutputLevel.Default => Color.Green,
+            OutputLevel.Warning => Color.Yellow,
+            OutputLevel.Error => Color.Orange1,
+            OutputLevel.Critical => Color.Red,
+            OutputLevel.None => Color.White,
+            _ => Color.Green,
         };
 
         if (level >= OutputLevel)
