@@ -8,4 +8,8 @@
 
 		[Option('e', "exclude", Required = false, HelpText = "Specify explicit directories to exclude. Overrides the default.", Default = new[] { "bin", "obj", "logs", "node_modules" })]
 		public IEnumerable<string> ExcludedDirectories { get; set; } = Enumerable.Empty<string>();
+
+	public bool IsExcluded(string directoryPath)
+		=> ExcludedDirectories.Any(dir
+			=> string.Equals(dir, Path.GetFileName(directoryPath), StringComparison.OrdinalIgnoreCase));
 	}

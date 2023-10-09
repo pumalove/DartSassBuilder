@@ -6,7 +6,6 @@ using Xunit;
 
 namespace DartSassBuilder.ExcludeTests;
 
-
 /// <summary>
 /// Test class for running DartSassBuilder with the exclude option for folders "foo" and "bar".
 /// </summary>

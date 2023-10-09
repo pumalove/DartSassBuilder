@@ -11,7 +11,7 @@ namespace DartSassBuilder.DirectoryTests;
 /// </summary>
 public class DirectoryTests : TestBase
 {
-    private const string targetFolder = "./logs";
+    private const string targetFolder = "logs";
     public DirectoryTests(): base(targetFolder)
     {
     }

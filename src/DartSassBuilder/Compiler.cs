@@ -37,26 +37,32 @@ public class Compiler
         {
             using var sassCompiler = new SassCompiler(() => new V8JsEngineFactory().CreateEngine());
 
-            foreach (var file in sassFiles)
+            async Task CompileFile(string file, SassCompiler compiler)
             {
                 var fileInfo = new FileInfo(file);
                 if (fileInfo.Name.StartsWith('_'))
                 {
                     Logger.Debug($"Skipping: {fileInfo.FullName}");
-                    continue;
+                    return;
                 }
 
                 Logger.Debug($"Processing: {fileInfo.FullName}");
 
-                var result = sassCompiler.CompileFile(file, options: compilationOptions);
+                var result = compiler.CompileFile(file, options: compilationOptions);
 
                 var newFile = fileInfo.FullName.Replace(fileInfo.Extension, ".css");
 
-                if (File.Exists(newFile) && result.CompiledContent.ReplaceLineEndings() == (await File.ReadAllTextAsync(newFile)).ReplaceLineEndings())
-                    continue;
+                if (File.Exists(newFile)
+                    && result.CompiledContent.ReplaceLineEndings() == (await File.ReadAllTextAsync(newFile)).ReplaceLineEndings())
+                {
+                    return;
+                }
 
                 await File.WriteAllTextAsync(newFile, result.CompiledContent);
             }
+
+            await Parallel.ForEachAsync(sassFiles, async (file, _)
+                => await CompileFile(file, sassCompiler));
         }
         catch (SassCompilerLoadException e)
         {
@@ -82,15 +88,24 @@ public class Compiler
             Logger.Error();
             AnsiConsole.WriteException(e);
         }
-
     }
 
-    private Task CompileFilesAsync(FilesOptions options) => CompileFilesAsync(options.Files,
-                                                                               options.SassCompilationOptions);
+    private Task CompileFilesAsync(FilesOptions options)
+        => CompileFilesAsync(options.Files,
+                              options.SassCompilationOptions);
 
     private async Task CompileDirectoriesAsync(DirectoryOptions options, string? directory = null)
     {
+        var isSubdirectory = directory is not null;
+
         directory ??= options.Directory;
+
+        if ((isSubdirectory && options.IsExcluded(directory))
+            || !ContainsSass(directory))
+        {
+            Logger.Debug($"Skipped directory {directory}");
+            return;
+        }
 
         Logger.Information(line: $"Sass compile directory: {directory}");
 
@@ -100,16 +115,16 @@ public class Compiler
 
         await CompileFilesAsync(sassFiles, options.SassCompilationOptions);
 
-        foreach (var subDirectory in Directory.EnumerateDirectories(directory))
+        foreach (var subDirectory in Directory.EnumerateDirectories(directory)
+                                                    .Where(ContainsSass))
         {
-            var directoryName = new DirectoryInfo(subDirectory).Name;
-            if (options.ExcludedDirectories.Any(dir
-                => string.Equals(dir, directoryName, StringComparison.OrdinalIgnoreCase)))
-            {
-                continue;
-            }
-
             await CompileDirectoriesAsync(options, subDirectory);
         }
     }
+
+    private static bool ContainsSass(string directory)
+        => Directory.EnumerateFiles(directory,
+                                     "*.s*ss",
+                                     SearchOption.AllDirectories)
+                    .Any();
 }
