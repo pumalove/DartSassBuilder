@@ -6,7 +6,7 @@ public enum OutputLevel
 {
     Trace,
     Debug,
-    Information,
+    Default,
     Warning,
     Error,
     Critical,
@@ -15,7 +15,7 @@ public enum OutputLevel
 
 public class ConsoleLogger
 {
-    public ConsoleLogger(OutputLevel outputLevel = OutputLevel.Information)
+    public ConsoleLogger(OutputLevel outputLevel = OutputLevel.Default)
     {
         OutputLevel = outputLevel;
     }
@@ -24,7 +24,7 @@ public class ConsoleLogger
 
     public void Trace(string line = "") => Log(OutputLevel.Trace, line);
     public void Debug(string line = "") => Log(OutputLevel.Debug, line);
-    public void Information(string line = "") => Log(OutputLevel.Information, line);
+    public void Default(string line = "") => Log(OutputLevel.Default, line);
     public void Warning(string line = "") => Log(OutputLevel.Warning, line);
     public void Error(string line = "") => Log(OutputLevel.Error, line);
     public void Critical(string line = "") => Log(OutputLevel.Critical, line);
@@ -35,7 +35,7 @@ public class ConsoleLogger
         {
             OutputLevel.Trace => "grey",
             OutputLevel.Debug => "blue",
-            OutputLevel.Information => "green",
+            OutputLevel.Default => "green",
             OutputLevel.Warning => "yellow",
             OutputLevel.Error => "orange",
             OutputLevel.Critical => "red",

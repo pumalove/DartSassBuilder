@@ -26,12 +26,12 @@ public class Compiler
 
         await compileTask;
 
-        Logger.Information("Sass operation completed.");
+        Logger.Default("Sass operation completed.");
     }
 
     private async Task CompileFilesAsync(IEnumerable<string> sassFiles, CompilationOptions compilationOptions)
     {
-        Logger.Information(line: "Sass compile files");
+        Logger.Default(line: "Sass compile files");
 
         try
         {
@@ -107,7 +107,7 @@ public class Compiler
             return;
         }
 
-        Logger.Information(line: $"Sass compile directory: {directory}");
+        Logger.Default(line: $"Sass compile directory: {directory}");
 
         var sassFiles =
             Directory.EnumerateFiles(directory)
