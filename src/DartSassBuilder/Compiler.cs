@@ -2,6 +2,8 @@
 
 using JavaScriptEngineSwitcher.V8;
 
+using Spectre.Console;
+
 namespace DartSassBuilder;
 
 public class Compiler
@@ -15,35 +17,22 @@ public class Compiler
 
     public async Task Compile(GenericOptions options)
     {
-        switch (options)
+        var compileTask = options switch
         {
-            case DirectoryOptions directory:
-            {
-                Logger.Information(line: $"Sass compile directory: {directory.Directory}");
+            DirectoryOptions dir => CompileDirectoriesAsync(dir),
+            FilesOptions files => CompileFilesAsync(files),
+            _ => throw new NotImplementedException("Invalid commandline option parsing"),
+        };
 
-                await CompileDirectoriesAsync(directory.Directory,
-                                              directory.ExcludedDirectories,
-                                              options.SassCompilationOptions);
+        await compileTask;
 
-                Logger.Information(line: "Sass files compiled");
-            }
-            break;
-            case FilesOptions file:
-            {
-                Logger.Information(line: $"Sass compile files");
-
-                await CompileFilesAsync(file.Files, options.SassCompilationOptions);
-
-                Logger.Information(line: "Sass files compiled");
-            }
-            break;
-            default:
-                throw new NotImplementedException("Invalid commandline option parsing");
-        }
+        Logger.Information("Sass operation completed.");
     }
 
     private async Task CompileFilesAsync(IEnumerable<string> sassFiles, CompilationOptions compilationOptions)
     {
+        Logger.Information(line: "Sass compile files");
+
         try
         {
             using var sassCompiler = new SassCompiler(() => new V8JsEngineFactory().CreateEngine());
@@ -87,26 +76,40 @@ public class Compiler
             Logger.Error();
             Logger.Error(line: SassErrorHelpers.GenerateErrorDetails(e));
         }
+        catch (Exception e)
+        {
+            Logger.Error(line: "Unknown exception during compilation");
+            Logger.Error();
+            AnsiConsole.WriteException(e);
+        }
+
     }
 
-    private async Task CompileDirectoriesAsync(string directory, IEnumerable<string> excludedDirectories, CompilationOptions compilationOptions)
+    private Task CompileFilesAsync(FilesOptions options) => CompileFilesAsync(options.Files,
+                                                                               options.SassCompilationOptions);
+
+    private async Task CompileDirectoriesAsync(DirectoryOptions options, string? directory = null)
     {
-        var sassFiles = Directory.EnumerateFiles(directory)
-            .Where(file => file.EndsWith(".scss", StringComparison.OrdinalIgnoreCase) || file.EndsWith(".sass", StringComparison.OrdinalIgnoreCase));
+        directory ??= options.Directory;
 
-        await CompileFilesAsync(sassFiles, compilationOptions);
+        Logger.Information(line: $"Sass compile directory: {directory}");
 
-        var subDirectories = Directory.EnumerateDirectories(directory);
-        foreach (var subDirectory in subDirectories)
+        var sassFiles =
+            Directory.EnumerateFiles(directory)
+                     .Where(file => Path.GetExtension(file).ToLower() is ".scss" or ".sass");
+
+        await CompileFilesAsync(sassFiles, options.SassCompilationOptions);
+
+        foreach (var subDirectory in Directory.EnumerateDirectories(directory))
         {
             var directoryName = new DirectoryInfo(subDirectory).Name;
-            if (excludedDirectories.Any(dir => string.Equals(dir, directoryName, StringComparison.OrdinalIgnoreCase)))
+            if (options.ExcludedDirectories.Any(dir
+                => string.Equals(dir, directoryName, StringComparison.OrdinalIgnoreCase)))
+            {
                 continue;
+            }
 
-            await CompileDirectoriesAsync(subDirectory, excludedDirectories, compilationOptions);
+            await CompileDirectoriesAsync(options, subDirectory);
         }
     }
-
-
-
 }
