@@ -1,5 +1,5 @@
-﻿namespace DartSassBuilder
-{
+﻿namespace DartSassBuilder;
+
 	[Verb("directory", isDefault: true)]
 	public class DirectoryOptions : GenericOptions
 	{
@@ -9,4 +9,3 @@
 		[Option('e', "exclude", Required = false, HelpText = "Specify explicit directories to exclude. Overrides the default.", Default = new[] { "bin", "obj", "logs", "node_modules" })]
 		public IEnumerable<string> ExcludedDirectories { get; set; } = Enumerable.Empty<string>();
 	}
-}

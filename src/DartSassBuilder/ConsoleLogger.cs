@@ -1,39 +1,38 @@
-﻿namespace DartSassBuilder
+﻿namespace DartSassBuilder;
+
+public enum OutputLevel
 {
-    public enum OutputLevel
+    Trace,
+    Debug,
+    Information,
+    Warning,
+    Error,
+    Critical,
+    None,
+}
+
+public class ConsoleLogger
+{
+    public ConsoleLogger(OutputLevel outputLevel = OutputLevel.Information)
     {
-        Trace,
-        Debug,
-        Information,
-        Warning,
-        Error,
-        Critical,
-        None,
+        OutputLevel = outputLevel;
     }
 
-    public class ConsoleLogger
+    private OutputLevel OutputLevel { get; }
+
+    public void Trace(string line = "") => Log(OutputLevel.Trace, line);
+    public void Debug(string line = "") => Log(OutputLevel.Debug, line);
+    public void Information(string line = "") => Log(OutputLevel.Information, line);
+    public void Warning(string line = "") => Log(OutputLevel.Warning, line);
+    public void Error(string line = "") => Log(OutputLevel.Error, line);
+    public void Critical(string line = "") => Log(OutputLevel.Critical, line);
+
+    private void Log(OutputLevel level, string line = "")
     {
-        public ConsoleLogger(OutputLevel outputLevel = OutputLevel.Information)
+        if (level >= OutputLevel)
         {
-            OutputLevel = outputLevel;
+            Console.WriteLine($"{level}: {line}");
         }
-
-        private OutputLevel OutputLevel { get; }
-
-        public void Trace(string line = "") => Log(OutputLevel.Trace, line);
-        public void Debug(string line = "") => Log(OutputLevel.Debug, line);
-        public void Information(string line = "") => Log(OutputLevel.Information, line);
-        public void Warning(string line = "") => Log(OutputLevel.Warning, line);
-        public void Error(string line = "") => Log(OutputLevel.Error, line);
-        public void Critical(string line = "") => Log(OutputLevel.Critical, line);
-
-        private void Log(OutputLevel level, string line = "")
-        {
-            if (level >= OutputLevel)
-            {
-                Console.WriteLine($"{level}: {line}");
-            }
-        }
-
     }
+
 }

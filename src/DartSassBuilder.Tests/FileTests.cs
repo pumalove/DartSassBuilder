@@ -5,11 +5,11 @@ using TestBaseLib;
 
 using Xunit;
 
-namespace DartSassBuilder.Tests
-{
+namespace DartSassBuilder.Tests;
+
 	/// <summary>
-    /// Test class for running DartSassBuilder within the "test-files" folder.
-    /// </summary>
+/// Test class for running DartSassBuilder within the "test-files" folder.
+/// </summary>
 	public class FileTests : TestBase
 	{
 		private const string targetFolder = "test-files";
@@ -18,17 +18,17 @@ namespace DartSassBuilder.Tests
 		{
 		}
 
-        [Theory]
-        [InlineData("test-new-format.css")]
-        [InlineData("test-indented-format.css")]
-        public void FileExistsTest(string cssFileName)
-        {
-            var cssFilePath = Path.Join(TestRoot, targetFolder, cssFileName);
+    [Theory]
+    [InlineData("test-new-format.css")]
+    [InlineData("test-indented-format.css")]
+    public void FileExistsTest(string cssFileName)
+    {
+        var cssFilePath = Path.Join(TestRoot, targetFolder, cssFileName);
 
-            Assert.True(File.Exists(cssFilePath));
+        Assert.True(File.Exists(cssFilePath));
 
-            File.Delete(cssFilePath);
-        }
+        File.Delete(cssFilePath);
+    }
 
 		[Theory]
 		[InlineData("", "_ignored.css")]
@@ -43,4 +43,3 @@ namespace DartSassBuilder.Tests
 			Assert.False(File.Exists(cssFilePath));
 		}
 	}
-}
